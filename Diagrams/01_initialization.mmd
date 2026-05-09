@@ -1,0 +1,27 @@
+sequenceDiagram
+autonumber
+actor Receptionist
+participant HospitalConsole
+participant HospitalService
+participant HospitalRepository
+participant HospitalJson as "hospital.json"
+
+
+HospitalConsole->>HospitalService: initialize(repository)
+HospitalService->>HospitalRepository: loadPatients()
+alt hospital.json exists
+  HospitalRepository->>HospitalJson: read patients array
+  HospitalJson-->>HospitalRepository: patient records
+  HospitalRepository-->>HospitalService: patients
+else file missing
+  HospitalRepository-->>HospitalService: empty patient list
+end
+HospitalService->>HospitalRepository: loadAppointments()
+alt hospital.json exists
+  HospitalRepository->>HospitalJson: read appointments array
+  HospitalJson-->>HospitalRepository: appointment records
+  HospitalRepository-->>HospitalService: appointments
+else file missing
+  HospitalRepository-->>HospitalService: empty appointment list
+end
+HospitalService-->>HospitalConsole: ready with in-memory state

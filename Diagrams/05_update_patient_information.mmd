@@ -1,0 +1,25 @@
+sequenceDiagram
+autonumber
+actor Receptionist
+participant HospitalConsole
+participant HospitalService
+participant HospitalRepository
+participant HospitalJson as "hospital.json"
+
+Receptionist->>HospitalConsole: Select "Update Patient Information"
+HospitalConsole->>Receptionist: Prompt for patient ID and updated data
+Receptionist-->>HospitalConsole: patientId, name, age
+HospitalConsole->>HospitalService: updatePatient(patientId, name, age, repository)
+HospitalService->>HospitalService: patientExists(patientId)
+HospitalService->>HospitalService: validatePatientInput(name, age)
+alt patient found and data valid
+  HospitalService->>HospitalRepository: saveAll(patients, appointments)
+  HospitalRepository->>HospitalJson: write updated JSON
+  HospitalJson-->>HospitalRepository: persisted
+  HospitalRepository-->>HospitalService: save complete
+  HospitalService-->>HospitalConsole: update success
+  HospitalConsole-->>Receptionist: Display success
+else invalid patient ID or invalid data
+  HospitalService-->>HospitalConsole: update failure
+  HospitalConsole-->>Receptionist: Display error message
+end

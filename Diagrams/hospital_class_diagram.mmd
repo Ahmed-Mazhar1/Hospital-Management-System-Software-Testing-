@@ -1,0 +1,68 @@
+classDiagram
+direction LR
+
+class HospitalConsole {
+  -HospitalService& service
+  +run() void
+  +showMenu() void
+  +registerPatient() void
+  +scheduleAppointment() void
+  +viewPatientRecords() void
+  +updatePatientInformation() void
+  +cancelAppointment() void
+  +readInt(prompt: string) int
+  +readString(prompt: string) string
+}
+
+class HospitalService {
+  -vector~Patient~ patients
+  -vector~Appointment~ appointments
+  -int nextPatientId
+  -int nextAppointmentId
+  +initialize(repository: HospitalRepository) void
+  +getPatients() vector~Patient~
+  +getAppointmentsForPatient(patientId: int) vector~Appointment~
+  +registerPatient(name: string, age: int, repository: HospitalRepository) Patient
+  +scheduleAppointment(patientId: int, date: string, time: string, repository: HospitalRepository) Appointment
+  +updatePatient(patientId: int, name: string, age: int, repository: HospitalRepository) bool
+  +cancelAppointment(appointmentId: int, repository: HospitalRepository) bool
+  +patientExists(patientId: int) bool
+  +appointmentExists(appointmentId: int) bool
+  +isTimeSlotAvailable(date: string, time: string) bool
+  +validatePatientInput(name: string, age: int) bool
+  +validateAppointmentInput(date: string, time: string) bool
+}
+
+class HospitalRepository {
+  -string filePath
+  +HospitalRepository(filePath: string = "hospital.json")
+  +loadPatients() vector~Patient~
+  +loadAppointments() vector~Appointment~
+  +saveAll(patients: vector~Patient~, appointments: vector~Appointment~) void
+  +fileExists() bool
+}
+
+class Patient {
+  +int id
+  +string name
+  +int age
+}
+
+class Appointment {
+  +int id
+  +int patientId
+  +string date
+  +string time
+}
+
+HospitalConsole --> HospitalService : uses
+HospitalService --> HospitalRepository : loads/saves JSON data
+HospitalService *-- Patient : manages
+HospitalService *-- Appointment : manages
+HospitalRepository ..> Patient : serializes
+HospitalRepository ..> Appointment : serializes
+Appointment --> Patient : references by patientId
+
+note for HospitalConsole "Presentation layer only.\nHandles menu flow and input/output."
+note for HospitalService "Logic layer only.\nOwns in-memory state, validation, ID generation,\nand appointment overlap prevention."
+note for HospitalRepository "Data layer only.\nReads/writes local hospital.json using nlohmann/json."
